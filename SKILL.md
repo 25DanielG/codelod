@@ -28,19 +28,19 @@ To remove: `bash uninstall.sh`
 
 ## Workflow
 
-1. Verify `codelod` is installed:
+1. Locate the skill directory:
 
 ```bash
-codelod --help
+CODELOD=~/.claude/skills/codelod
 ```
 
-If the command is not found, the user needs to run `bash install.sh` from the cloned repo first.
-
-2. Generate or refresh the context layers from the repo root:
+2. Generate or refresh context layers:
 
 ```bash
-codelod <repo-path>
+python3 $CODELOD/scripts/build_context.py <repo-path>
 ```
+
+This works with any `python3` — no pip install or venv required. The script self-resolves `codelod_context` relative to its own location.
 
 3. Start at `.context/L0.md` to identify the relevant area of the repo.
 4. Read `.context/L1.md` only for the directories or files that look relevant.
@@ -49,13 +49,13 @@ codelod <repo-path>
 
 ## Operating Rules
 
-- Default to the lowest detail level that can still move the task forward with quality.
-- Do not jump straight to full files for broad questions, repo exploration, or initial triage.
-- Treat `L3` as the final escalation step, not the starting point.
-- If the context artifacts look stale after a code change, regenerate them before continuing.
-- Before regenerating, confirm that `python3` resolves to a usable interpreter for the current repo.
-- When a task is limited to 2-3 files, keep the rest of the repo at `L0-L2`.
-- Prefer the `extractor` and `attempts` fields in `L2` to understand whether a file was analyzed by a strong parser, a fallback backend, or summary-only mode.
+- **Always read L0 first.** No exceptions. Even if the task seems narrow.
+- **Always read L1 before opening any source file.** L1 costs ~200 tokens and prevents reading the wrong file.
+- Only open L2 for files L1 identifies as relevant. Only open L3 (full source) for files L2 confirms need implementation detail.
+- If `.context/` is missing or stale, regenerate before doing anything else.
+- When a task touches ≤3 files and you already know exactly which ones, you may skip L0/L1 — but read L2 first.
+- Never read a full source file speculatively. L2 signatures are enough to understand structure.
+- Prefer `extractor` and `attempts` fields in L2 to judge parser confidence.
 
 ## Artifact Layout
 
