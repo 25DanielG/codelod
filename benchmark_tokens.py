@@ -38,7 +38,6 @@ def _build_counter() -> tuple[callable, str]:
 
 def _collect_source(root: Path) -> str:
     """concat all tracked source files — baseline (l3) token cost."""
-    sys.path.insert(0, str(Path(__file__).parent))
     from codelod_context.fs import iter_source_files, safe_read_text
 
     parts: list[str] = []
@@ -80,12 +79,10 @@ def main(argv: list[str] | None = None) -> int:
     root = Path(args.root).resolve()
     ctx = root / ".context"
 
-    build_script = Path(__file__).parent / "build_context.py"
-
     if args.rebuild or not ctx.exists():
         print("Building context artifacts...")
         result = subprocess.run(
-            [sys.executable, str(build_script), str(root)],
+            ["codelod", str(root)],
             capture_output=True,
             text=True,
         )

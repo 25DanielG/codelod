@@ -14,23 +14,32 @@ The goal is to replace "open files until the answer appears" with progressive co
 - `L2`: per-file symbol/signature metadata with docstrings
 - `L3`: full source code
 
-## Workflow
-
-1. Verify the repo has a working Python environment before running the generator.
-
-Suggested checks:
+## Installation
 
 ```bash
-python3 --version
-python3 -c "import sys; print(sys.executable)"
+git clone https://github.com/25DanielG/codelod
+cd codelod
+bash install.sh
 ```
 
-If `python3` is unavailable or broken, do not assume the skill can build `.context/` artifacts. Either use an existing `.context/` directory if it is present and trustworthy, or fix/select the correct Python environment first.
+This installs the `codelod` CLI and symlinks the skill into `~/.claude/skills/codelod`.
 
-2. Generate or refresh the context layers from the repo root only after the environment check passes:
+To remove: `bash uninstall.sh`
+
+## Workflow
+
+1. Verify `codelod` is installed:
 
 ```bash
-python3 scripts/build_context.py
+codelod --help
+```
+
+If the command is not found, the user needs to run `bash install.sh` from the cloned repo first.
+
+2. Generate or refresh the context layers from the repo root:
+
+```bash
+codelod <repo-path>
 ```
 
 3. Start at `.context/L0.md` to identify the relevant area of the repo.

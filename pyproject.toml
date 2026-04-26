@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "codelod"
+version = "2.2.0"
+description = "Progressive context resolution for large codebases"
+requires-python = ">=3.10"
+
+[project.scripts]
+codelod = "codelod_context.cli:main"
+codelod-benchmark = "benchmark_tokens:main"
+
+[tool.setuptools]
+py-modules = ["benchmark_tokens"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["codelod_context*"]
