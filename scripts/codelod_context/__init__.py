@@ -1,0 +1,5 @@
+"""codelod package. exports version string."""
+
+__all__ = ["__version__"]
+
+__version__ = "2.2.0"
