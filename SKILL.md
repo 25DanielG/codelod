@@ -1,6 +1,6 @@
 ---
 name: codelod
-description: repository files -> context level layers (L0 tree, L1 summaries, L2 symbols, L3 source). creates a zoom-in workflow that saves tokens + JSON audit trail
+description: "Auto-trigger on any code task in a repo. Builds L0 tree, L1 summaries, L2 symbols before reading source files. Replaces speculative full-file reads with progressive zoom — saves tokens on any sizeable codebase."
 disable-model-invocation: false
 ---
 
@@ -47,12 +47,44 @@ This works with any `python3` — no pip install or venv required. The script se
 5. Open the matching `.context/L2/[filename].json` files to inspect signatures, classes, functions, and docstrings.
 6. Read full source files only after `L0-L2` narrow the scope enough that implementation detail is necessary.
 
+## When to Trigger
+
+Auto-apply this skill whenever:
+- the task involves reading, navigating, or editing code in a repo with more than ~10 source files
+- the user asks about code structure, where something is, or how something works
+- you are about to open a source file you have not read yet this session
+
+Skip this skill for:
+- single-file tasks where the file is already in context
+- non-code tasks (docs, config-only, conversation)
+- repos where `.context/` was just built this session and no files have changed
+
+## When to Rebuild Context
+
+Check whether `.context/` needs rebuilding before each task. Rebuild if **any** of:
+
+1. `.context/` does not exist
+2. `git status` shows modified/added/deleted source files since last build — run:
+   ```bash
+   git -C <repo-path> diff --name-only HEAD
+   ```
+   If output includes source files not reflected in `.context/L1.md`, rebuild.
+3. `.context/L0.md` is older than the newest source file:
+   ```bash
+   find <repo-path> -name "*.py" -o -name "*.ts" -o -name "*.js" -newer <repo-path>/.context/L0.md | head -1
+   ```
+   Any output = rebuild.
+4. You edited files during this session — rebuild after edits before reading context again.
+
+Do **not** rebuild if:
+- `.context/` exists and none of the above conditions are met
+- the task is read-only and no files changed since last build
+
 ## Operating Rules
 
 - **Always read L0 first.** No exceptions. Even if the task seems narrow.
 - **Always read L1 before opening any source file.** L1 costs ~200 tokens and prevents reading the wrong file.
 - Only open L2 for files L1 identifies as relevant. Only open L3 (full source) for files L2 confirms need implementation detail.
-- If `.context/` is missing or stale, regenerate before doing anything else.
 - When a task touches ≤3 files and you already know exactly which ones, you may skip L0/L1 — but read L2 first.
 - Never read a full source file speculatively. L2 signatures are enough to understand structure.
 - Prefer `extractor` and `attempts` fields in L2 to judge parser confidence.
